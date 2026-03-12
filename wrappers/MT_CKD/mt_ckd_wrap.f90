@@ -76,7 +76,7 @@ contains
 
     VMRH2O = vmr_h2o
 
-    print 911, pave,tave,xlength,vmrh2o
+!    print 911, pave,tave,xlength,vmrh2o
     911  format(1x,f13.6,f17.4,f18.4,f12.8)
 
     WTOT = ALOSMT*(PAVE/1013.)*(273./TAVE)* xlength

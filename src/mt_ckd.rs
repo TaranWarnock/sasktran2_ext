@@ -1,20 +1,25 @@
+use pyo3::prelude::*;
 use std::fs;
 use std::path::{Path, PathBuf};
 
 /// Prepare the NetCDF file where Fortran will find it
 fn ensure_mtckd_netcdf_available() -> std::io::Result<()> {
-    // Path to your source NetCDF file (maybe in a config folder or bundled asset)
-    let src = Path::new("/Users/djz828/dev/sasktran2_ext/vendor/MT_CKD/run_example/absco-ref_wv-mt-ckd.nc");
+    Python::attach(|py| {
+        // Path to bundled NetCDF file
+        let resources = py.import("importlib.resources")?;
+        let files = resources.call_method1("files", ("sasktran2_ext",))?;
+        let src: PathBuf = files.call_method1("joinpath", ("data/absco-ref_wv-mt-ckd.nc",))?.extract()?;
 
-    // Destination is current working directory, where Fortran expects it
-    let dest = Path::new("absco-ref_wv-mt-ckd.nc");
+        // Destination is current working directory, where Fortran expects it
+        let dest = Path::new("absco-ref_wv-mt-ckd.nc");
 
-    // Avoid overwriting unnecessarily
-    if !dest.exists() {
-        fs::copy(&src, &dest)?;
-    }
+        // Avoid overwriting unnecessarily
+        if !dest.exists() {
+            fs::copy(&src, &dest)?;
+        }
 
-    Ok(())
+        Ok(())
+    })
 }
 
 extern "C" {
