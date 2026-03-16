@@ -95,7 +95,7 @@ contains
 !      WK(2) = 0.
 ! ozone:
 !      WK(3) = 3.75E-6 * W_dry
-    WK(3) = 0.
+    WK(3) = vmr_o3 * W_dry
 ! water vapor:
     if (abs(vmrh2o-1.) .lt. 1.e-05) then
         wk(1) = wtot
