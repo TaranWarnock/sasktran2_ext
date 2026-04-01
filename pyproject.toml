@@ -13,6 +13,7 @@ classifiers = [
 dynamic = ["version"]
 dependencies = [
     "numpy",
+    "sasktran2",
 ]
 
 [tool.maturin]
