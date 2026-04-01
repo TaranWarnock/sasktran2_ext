@@ -30,7 +30,7 @@ class MTCKDContinuum(Constituent):
         self._o3_name = o3_name
         self._mtckd_wavenumbers = np.arange(
             -10, 19910, 10
-        )  # grid hardcoded in fortran module
+        )  # same as the wavenumber grid hardcoded in the MTCKD fortran code
         self._fractional_change = numeric_wf_fractional_change
         self._central_difference = numeric_wf_central_difference
 
@@ -89,29 +89,6 @@ class MTCKDContinuum(Constituent):
         )
 
         # interpolate vmrs to altitude grid
-        alts = atmo.model_geometry.altitudes()
-
-        # h2o_vmr = np.interp(
-        #     alts,
-        #     atmo[self._h2o_name].altitudes_m,
-        #     atmo[self._h2o_name].vmr,
-        #     left=atmo[self._h2o_name].vmr[0],
-        #     right=atmo[self._h2o_name].vmr[-1],
-        # )
-        # co2_vmr = np.interp(
-        #     alts,
-        #     atmo[self._co2_name].altitudes_m,
-        #     atmo[self._co2_name].vmr,
-        #     left=atmo[self._co2_name].vmr[0],
-        #     right=atmo[self._co2_name].vmr[-1],
-        # )
-        # o3_vmr = np.interp(
-        #     alts,
-        #     atmo[self._o3_name].altitudes_m,
-        #     atmo[self._o3_name].vmr,
-        #     left=atmo[self._o3_name].vmr[0],
-        #     right=atmo[self._o3_name].vmr[-1],
-        # )
         h2o_vmr = h2o_alt_interp_matrix @ atmo[self._h2o_name].vmr
         co2_vmr = co2_alt_interp_matrix @ atmo[self._co2_name].vmr
         o3_vmr = o3_alt_interp_matrix @ atmo[self._o3_name].vmr
@@ -130,26 +107,11 @@ class MTCKDContinuum(Constituent):
         continuum_absorption = continuum_absorption[:, 0 : len(self._mtckd_wavenumbers)]
 
         # interpolate continuum to atmosphere grid
-        # f = interp1d(
-        #     self._mtckd_wavenumbers,
-        #     continuum_absorption,
-        #     axis=1,
-        #     bounds_error=False,
-        #     fill_value=0,
-        # )
-        # atmo.storage.total_extinction[:] += f(atmo.wavenumbers_cminv)
-
         atmo.storage.total_extinction[:] += (
             np.nan_to_num(continuum_absorption) @ wavenum_interp_matrix.T
         )
 
     def register_derivative(self, atmo: sk.Atmosphere, name: str):
-        try:
-            from sasktran2_ext import mt_ckd
-        except ImportError:
-            msg = "sasktran2_ext is required to use the MT-CKD continuum constituent"
-            raise ImportError(msg)  # noqa: B904
-
         wavenum_interp_matrix = linear_interpolating_matrix(
             self._mtckd_wavenumbers,
             atmo.wavenumbers_cminv,
@@ -189,27 +151,6 @@ class MTCKDContinuum(Constituent):
 
         alts = atmo.model_geometry.altitudes()
 
-        # h2o_vmr = np.interp(
-        #     alts,
-        #     atmo[self._h2o_name].altitudes_m,
-        #     atmo[self._h2o_name].vmr,
-        #     left=atmo[self._h2o_name].vmr[0],
-        #     right=atmo[self._h2o_name].vmr[-1],
-        # )
-        # co2_vmr = np.interp(
-        #     alts,
-        #     atmo[self._co2_name].altitudes_m,
-        #     atmo[self._co2_name].vmr,
-        #     left=atmo[self._co2_name].vmr[0],
-        #     right=atmo[self._co2_name].vmr[-1],
-        # )
-        # o3_vmr = np.interp(
-        #     alts,
-        #     atmo[self._o3_name].altitudes_m,
-        #     atmo[self._o3_name].vmr,
-        #     left=atmo[self._o3_name].vmr[0],
-        #     right=atmo[self._o3_name].vmr[-1],
-        # )
         h2o_vmr = h2o_alt_interp_matrix @ atmo[self._h2o_name].vmr
         co2_vmr = co2_alt_interp_matrix @ atmo[self._co2_name].vmr
         o3_vmr = o3_alt_interp_matrix @ atmo[self._o3_name].vmr
@@ -240,7 +181,6 @@ class MTCKDContinuum(Constituent):
                 100.0,
             )[:, 0 : len(self._mtckd_wavenumbers)]
 
-            # if input_var[i] >= dx:
             if self._central_difference:
                 # central diff
                 input_var -= 2 * dx
@@ -261,19 +201,10 @@ class MTCKDContinuum(Constituent):
 
                 input_var -= dx
 
-            # f = interp1d(
-            #     self._mtckd_wavenumbers,
-            #     central_diff_wf,
-            #     axis=1,
-            #     bounds_error=False,
-            #     fill_value=0,
-            # )
-            # d_mapping.d_extinction[:] += f(atmo.wavenumbers_cminv)
             d_mapping.d_extinction[:] += (
                 np.nan_to_num(central_diff_wf) @ wavenum_interp_matrix.T
             )
 
-            # not sure if correct
             d_ssa = (
                 np.nan_to_num(central_diff_wf)
                 @ wavenum_interp_matrix.T
