@@ -1,17 +1,21 @@
 from __future__ import annotations
 
 import numpy as np
-
 import sasktran2 as sk
+from sasktran2.constituent.base import Constituent
 from sasktran2.util.interpolation import linear_interpolating_matrix
 
-from sasktran2.constituent.base import Constituent
 from sasktran2_ext import mt_ckd
 
 
 class MTCKDContinuum(Constituent):
     def __init__(
-        self, h2o_name: str = "H2O", co2_name: str = "CO2", o3_name: str = "O3", numeric_wf_fractional_change=1e-5, numeric_wf_central_difference=True,
+        self,
+        h2o_name: str = "H2O",
+        co2_name: str = "CO2",
+        o3_name: str = "O3",
+        numeric_wf_fractional_change=1e-5,
+        numeric_wf_central_difference=True,
     ):
         """
         The MT-CKD continuum absorption model. Requires the saskran2_ext package.
@@ -164,11 +168,12 @@ class MTCKDContinuum(Constituent):
             100.0,
         )[:, 0 : len(self._mtckd_wavenumbers)]
 
-        for input_var, d_mapping in zip(
+        for input_var_base, d_mapping in zip(
             [pressure_pa, temperature_k, h2o_vmr, co2_vmr, o3_vmr],
             [p_mapping, t_mapping, h2o_mapping, co2_mapping, o3_mapping],
             strict=True,
         ):
+            input_var = input_var_base
             dx = input_var * self._fractional_change
 
             input_var += dx
