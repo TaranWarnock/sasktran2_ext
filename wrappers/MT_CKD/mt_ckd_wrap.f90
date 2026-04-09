@@ -142,7 +142,7 @@ contains
     ! xkt=tave/radcn2
     ! vi=v1h+float(i-1)*dvh
     ! val = absrb(i) * radfn(vi, xkt)
-    val = absrb(i)
+    val = 0.0
 
   end function
 
