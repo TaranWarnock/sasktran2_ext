@@ -126,7 +126,7 @@ contains
   subroutine run_mtckd() bind(C)
     integer(c_int) :: jrad
     jrad = 0
-    ! call contnm(jrad)
+    call contnm(jrad)
   end subroutine
 
   function get_absrb(i) result(val) bind(C)
