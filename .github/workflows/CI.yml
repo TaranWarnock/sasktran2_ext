@@ -107,7 +107,7 @@ jobs:
       matrix:
         platform:
           - runner: windows-latest
-            target: x86_64-pc-windows-gnu
+            target: x64
     steps:
       - name: Install MSYS2 and NetCDF
         uses: msys2/setup-msys2@v2
@@ -132,23 +132,41 @@ jobs:
           NCI: C:/msys64/mingw64/include
           NCL: C:/msys64/mingw64/lib
           FC: C:/msys64/mingw64/bin/gfortran.exe
+          MTCKD_LIB_NAME: mtckd.lib
         shell: msys2 {0}
         run: |
           cd build_scripts/MT_CKD
-          make mtckd_static
+          make mtckd_shared
           cd ../..
+          cd bin
+          gendef mtckd.dll
+          dlltool -d mtckd.def -l mtckd.lib
+          cp mtckd.dll c:/msys64/mingw64/bin/
+          cd ..
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         env:
+          MTCKD_LIB_NAME: mtckd.lib
           RUST_BACKTRACE: full
           CARGO_PROFILE_RELEASE_BUILD_OVERRIDE_DEBUG: true
         with:
           target: ${{ matrix.platform.target }}
           args: --release --out dist -i python3.14
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
-
-      - name: test wheel import
+      - name: Append msys root to path
         shell: bash
+        run: |
+          echo "PATH=$PATH:/c/msys64/mingw64/bin:bin" >> "$GITHUB_ENV"
+      - name: delve wheels
+        shell: bash -el {0}
+        run: |
+          pip install delvewheel
+          delvewheel show dist/*whl
+          delvewheel repair dist/*.whl
+          rm -rf dist/*.whl
+          mv wheelhouse/*.whl dist/
+      - name: test wheel import
+        shell: bash -el {0}
         run: |
           pip install --force-reinstall --verbose dist/*.whl
           python -c 'import sasktran2_ext'
@@ -177,7 +195,7 @@ jobs:
           path: dist
 
       - name: install wheels
-        shell: bash
+        shell: bash -el {0}
         run: |
           pip install --force-reinstall --verbose dist/sasktran2_ext-*.whl pytest
 
