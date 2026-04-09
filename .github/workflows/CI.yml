@@ -136,13 +136,8 @@ jobs:
         shell: msys2 {0}
         run: |
           cd build_scripts/MT_CKD
-          make mtckd_shared
+          make mtckd_static
           cd ../..
-          cd bin
-          gendef mtckd.dll
-          dlltool -d mtckd.def -l mtckd.lib
-          cp mtckd.dll c:/msys64/mingw64/bin/
-          cd ..
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         env:
