@@ -133,16 +133,15 @@ contains
     integer(c_int), value :: i
     real(c_double) :: val
 
-    ! COMMON /ABSORB/ V1ABS,V2ABS,DVABS,NPTABS,ABSRB(5050)              ! 500060
-    ! COMMON /cnth2o/ V1h,V2h,DVh,NPTh,Ch(5050),csh2o(5050),cfh2o(5050)
-    ! COMMON /FILHDR/ XID(10),SECANT,PAVE,TAVE,HMOLID(60),XALTZ(4),  &    ! F00130
-    !                 WK(60),PZL,PZU,TZL,TZU,WBROAD,DV ,V1 ,V2 ,TBOUND, &  ! F00140
-    !                 EMISIV,FSCDID(17),NMOL,LAYER ,YI1,YID(10),LSTWDF   ! F00150
+    COMMON /ABSORB/ V1ABS,V2ABS,DVABS,NPTABS,ABSRB(5050)              ! 500060
+    COMMON /cnth2o/ V1h,V2h,DVh,NPTh,Ch(5050),csh2o(5050),cfh2o(5050)
+    COMMON /FILHDR/ XID(10),SECANT,PAVE,TAVE,HMOLID(60),XALTZ(4),  &    ! F00130
+                    WK(60),PZL,PZU,TZL,TZU,WBROAD,DV ,V1 ,V2 ,TBOUND, &  ! F00140
+                    EMISIV,FSCDID(17),NMOL,LAYER ,YI1,YID(10),LSTWDF   ! F00150
 
-    ! xkt=tave/radcn2
-    ! vi=v1h+float(i-1)*dvh
-    ! val = absrb(i) * radfn(vi, xkt)
-    val = 0.0
+    xkt=tave/radcn2
+    vi=v1h+float(i-1)*dvh
+    val = absrb(i) * radfn(vi, xkt)
 
   end function
 
