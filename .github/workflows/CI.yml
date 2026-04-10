@@ -135,7 +135,9 @@ jobs:
           MTCKD_LIB_NAME: mtckd.lib
         shell: msys2 {0}
         run: |
+          pacman -U --noconfirm https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-hdf5-1.14.3-2-any.pkg.tar.zst
           pacman -U --noconfirm https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-netcdf-4.9.2-4-any.pkg.tar.zst
+          pacman -U --noconfirm https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-libxml2-2.12.9-1-any.pkg.tar.zst
           cd build_scripts/MT_CKD
           make mtckd_shared
           cd ../..
