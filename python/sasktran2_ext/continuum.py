@@ -18,7 +18,7 @@ class MTCKDContinuum(Constituent):
         numeric_wf_central_difference=True,
     ):
         """
-        The MT-CKD continuum absorption model. Requires the saskran2_ext package.
+        The MT-CKD continuum absorption model.
 
         Parameters
         ----------

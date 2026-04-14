@@ -15,10 +15,12 @@ dependencies = [
     "numpy",
     "sasktran2",
 ]
+description = "Extensions for the SASKTRAN radiative transfer model Version 2"
+readme = "README.md"
 
 [project.optional-dependencies]
 test = ["pytest"]
-dev = ["ruff"]
+dev = ["ruff", "sphinx", "sphinx_book_theme", "myst-nb", "sphinx_design", "sphinx-github-changelog"]
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
@@ -30,7 +32,7 @@ cache-keys = [{file = "pyproject.toml"}, {file = "rust/Cargo.toml"}, {file = "**
 
 [tool.ruff]
 src = ["python"]
-exclude = ["tools/*", "docs/sphinx/source/conf.py", "python/sasktran2/_core.pyi"]
+exclude = ["tools/*", "docs/sphinx/source/conf.py", "python/sasktran2_ext/_core.pyi"]
 
 [tool.ruff.lint]
 select = [
@@ -75,3 +77,60 @@ isort.required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["T20"]
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+
+[tool.pixi.activation.env]
+FC = "gfortran"
+NCI = "$CONDA_PREFIX/include"
+NCL = "$CONDA_PREFIX/lib"
+
+[tool.pixi.tasks]
+build_mtckd = { cmd = "make mtckd_static", cwd = "build_scripts/MT_CKD" }
+build = { cmd = [
+    "pip",
+    "install",
+    "--no-build-isolation",
+    "-v",
+    "-e",
+    ".",
+], cwd = ".", depends-on = ["build_mtckd"] }
+test = { cmd = "pytest tests/", cwd = "." }
+pre-commit = { cmd = "pre-commit run -a", cwd = "." }
+docs = { cmd = "sphinx-build -b html docs/sphinx/source docs/sphinx/build", cwd = "." }
+readthedocs = { cmd = "rm -rf $READTHEDOCS_OUTPUT/html && cp -r docs/sphinx/build/ $READTHEDOCS_OUTPUT/html", depends-on = ["docs"] }
+
+[tool.pixi.pypi-dependencies]
+
+[tool.pixi.pypi-options]
+
+[tool.pixi.environments]
+default = ["test", "dev"]
+
+[tool.pixi.dependencies]
+maturin = "*"
+pip = "*"
+numpy = "*"
+sasktran2 = "*"
+gfortran = "*"
+netcdf-fortran = "*"
+ipython = "*"
+make = "*"
+binutils = "*"
+rust = "*"
+pytest = "*"
+pre-commit = "*"
+sphinx = "*"
+myst-nb = "*"
+matplotlib = "*"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+xfail_strict = true
+filterwarnings = [
+    "ignore:(ast.Str|Attribute s|ast.NameConstant|ast.Num) is deprecated:DeprecationWarning:_pytest",  # Python 3.12
+]
+testpaths = ["tests"]
