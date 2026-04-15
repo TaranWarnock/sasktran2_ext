@@ -52,10 +52,11 @@ def _test_scenarios(absorption_file):
             opt_prop,
             altitude_grid,
             np.interp(altitude_grid, constit.altitudes_m, constit.vmr),
-            "zero")
-    atmosphere['emission'] = sk.constituent.ThermalEmission()
+            "zero",
+        )
+    atmosphere["emission"] = sk.constituent.ThermalEmission()
     atmosphere["surface_emission"] = sk.constituent.SurfaceThermalEmission(300, 0.9)
-    atmosphere['continuum'] = MTCKDContinuum(
+    atmosphere["continuum"] = MTCKDContinuum(
         numeric_wf_fractional_change=1e-2,
         numeric_wf_central_difference=True,
     )
@@ -88,14 +89,16 @@ def test_continuum_wf(zero_absorption_file):
             )
 
             radi = radiance.isel(los=0, stokes=0)
-            radi['altitude'] = ('altitude', atmosphere.model_geometry.altitudes())
-            radi['CO2_altitude'] = ('CO2_altitude', atmosphere["CO2"].altitudes_m)
-            radi['H2O_altitude'] = ('H2O_altitude', atmosphere["H2O"].altitudes_m)
-            radi['O3_altitude'] = ('O3_altitude', atmosphere["O3"].altitudes_m)
+            radi["altitude"] = ("altitude", atmosphere.model_geometry.altitudes())
+            radi["CO2_altitude"] = ("CO2_altitude", atmosphere["CO2"].altitudes_m)
+            radi["H2O_altitude"] = ("H2O_altitude", atmosphere["H2O"].altitudes_m)
+            radi["O3_altitude"] = ("O3_altitude", atmosphere["O3"].altitudes_m)
 
             sk.test_util.wf.validate_wf(
                 radi[f"wf_continuum_{species}_vmr"],
-                radi[f"wf_{species}_vmr_numeric"].interp({f"{species}_altitude": radi.altitude}),
+                radi[f"wf_{species}_vmr_numeric"].interp(
+                    {f"{species}_altitude": radi.altitude}
+                ),
                 wf_dim="altitude",
                 decimal=5,
             )
