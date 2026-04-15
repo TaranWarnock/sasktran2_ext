@@ -103,6 +103,7 @@ docs = { cmd = "sphinx-build -b html docs/sphinx/source docs/sphinx/build", cwd 
 readthedocs = { cmd = "rm -rf $READTHEDOCS_OUTPUT/html && cp -r docs/sphinx/build/ $READTHEDOCS_OUTPUT/html", depends-on = ["docs"] }
 
 [tool.pixi.pypi-dependencies]
+hitran-api = "*"
 
 [tool.pixi.pypi-options]
 

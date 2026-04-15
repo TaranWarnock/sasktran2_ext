@@ -35,7 +35,8 @@ The SASKTRAN Radiative Transfer Framework (Version 2) Extensions
 
 ::::
 
-SASKTRAN2 extensions provide additional functionality to the base SASKTRAN2 package.
+This package provides extensions to the [SASKTRAN2](https://sasktran2.readthedocs.io) atmospheric radiative transfer model,
+including an implementation of the MT_CKD continuum.
 
 ::::{grid} 1 1 2 2
 :gutter: 2

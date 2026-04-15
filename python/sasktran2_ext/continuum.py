@@ -14,20 +14,33 @@ class MTCKDContinuum(Constituent):
         h2o_name: str = "H2O",
         co2_name: str = "CO2",
         o3_name: str = "O3",
-        numeric_wf_fractional_change=1e-5,
-        numeric_wf_central_difference=True,
+        numeric_wf_fractional_change: float = 1e-2,
+        numeric_wf_central_difference: bool = True,
     ):
         """
-        The MT-CKD continuum absorption model.
+        A constituent which implements the MT-CKD continuum absorption model (https://github.com/AER-RC/MT_CKD).
+
+        This constituent requires that the atmosphere contains H2O, CO2, and O3 constituents, each with a
+        vmr property. Pressure, temperature, and wavelengths (or wavenumbers) must also be included so they
+        can be passed to the continuum model.
+
+        Derivatives of the continuum absorption with respect to pressure, temperature, H2O, CO2, and O3
+        are calculated numerically by running the continuum model with perturbed species profiles.
+        This results two additionaly calls to the continuum model for each species when using the default
+        central difference method, or one additional call if a forward difference method is used.
 
         Parameters
         ----------
         h2o_name : str, optional
-            The name of the H2O constituent in the atmosphere., by default "H2O"
+            The name of the H2O constituent in the atmosphere. By default "H2O"
         co2_name : str, optional
-            The name of the CO2 constituent in the atmosphere., by default "CO2"
+            The name of the CO2 constituent in the atmosphere. By default "CO2"
         o3_name : str, optional
-            The name of the O3 constituent in the atmosphere., by default "O3"
+            The name of the O3 constituent in the atmosphere. By default "O3"
+        numeric_wf_fractional_change : float, optional
+            The perturbation to use in numeric differentiation of the continuum absorption. By default 1e-2
+        numeric_wf_central_difference : bool, optional
+            If True, use central difference for weighting functions. If False, use forward difference. By default True
         """
         self._h2o_name = h2o_name
         self._co2_name = co2_name
@@ -39,14 +52,6 @@ class MTCKDContinuum(Constituent):
         self._central_difference = numeric_wf_central_difference
 
     def add_to_atmosphere(self, atmo: sk.Atmosphere):
-        """
-        Parameters
-        ----------
-        atmo : sk.Atmosphere
-
-
-        :meta private:
-        """
         if atmo.wavelengths_nm is None:
             msg = "It is required to give the Atmosphere object wavelengths to use the continuum constituent"
             raise ValueError(msg)
