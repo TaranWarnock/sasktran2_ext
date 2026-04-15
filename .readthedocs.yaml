@@ -15,3 +15,6 @@ build:
 
 sphinx:
    configuration: docs/sphinx/source/conf.py
+
+submodules:
+  recursive: true
