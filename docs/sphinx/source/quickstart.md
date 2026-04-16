@@ -106,6 +106,7 @@ output_with_continuum = engine.calculate_radiance(atmosphere)
 
 Plot the result,
 ```{code-cell}
+:tags: ["remove-input","remove-stdout","remove-stderr"]
 import matplotlib.pyplot as plt
 output_no_continuum["radiance"].isel(los=0, stokes=0).plot(label="No continuum")
 output_with_continuum["radiance"].isel(los=0, stokes=0).plot(label="With continuum")
