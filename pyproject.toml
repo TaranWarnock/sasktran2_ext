@@ -13,7 +13,14 @@ classifiers = [
 dynamic = ["version"]
 dependencies = [
     "numpy",
+    "sasktran2",
 ]
+description = "Extensions for the SASKTRAN radiative transfer model Version 2"
+readme = "README.md"
+
+[project.optional-dependencies]
+test = ["pytest"]
+dev = ["ruff", "sphinx", "sphinx_book_theme", "myst-nb", "sphinx_design", "sphinx-github-changelog"]
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
@@ -22,3 +29,110 @@ module-name = "sasktran2_ext._core"
 
 [tool.uv]
 cache-keys = [{file = "pyproject.toml"}, {file = "rust/Cargo.toml"}, {file = "**/*.rs"}]
+
+[tool.ruff]
+src = ["python"]
+exclude = ["tools/*", "docs/sphinx/source/conf.py", "python/sasktran2_ext/_core.pyi"]
+
+[tool.ruff.lint]
+select = [
+    "E", "F", "W", # flake8
+    "B",           # flake8-bugbear
+    "I",           # isort
+    "ARG",         # flake8-unused-arguments
+    "C4",          # flake8-comprehensions
+    "EM",          # flake8-errmsg
+    "ICN",         # flake8-import-conventions
+    "ISC",         # flake8-implicit-str-concat
+    "G",           # flake8-logging-format
+    "PGH",         # pygrep-hooks
+    "PIE",         # flake8-pie
+    "PL",          # pylint
+    "PT",          # flake8-pytest-style
+    "PTH",         # flake8-use-pathlib
+    "RET",         # flake8-return
+    "RUF",         # Ruff-specific
+    "SIM",         # flake8-simplify
+    "T20",         # flake8-print
+    "UP",          # pyupgrade
+    "YTT",         # flake8-2020
+    "EXE",         # flake8-executable
+    "NPY",         # NumPy specific rules
+    "PD",          # pandas-vet
+]
+extend-ignore = [
+    "PLR",    # Design related pylint codes
+    "E501",   # Line too long
+    "PD011", # wanting to use to_numpy instead of values
+    "G004",   # Logging format
+    "PD010", # Pandas unstack
+]
+unfixable = [
+    "T20",  # Removes print statements
+    "F841", # Removes unused variables
+    "F401", # Removes unused imports
+]
+flake8-unused-arguments.ignore-variadic-names = true
+isort.required-imports = ["from __future__ import annotations"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["T20"]
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+
+[tool.pixi.activation.env]
+FC = "gfortran"
+NCI = "$CONDA_PREFIX/include"
+NCL = "$CONDA_PREFIX/lib"
+
+[tool.pixi.tasks]
+build_mtckd = { cmd = "make mtckd_static", cwd = "build_scripts/MT_CKD" }
+build = { cmd = [
+    "pip",
+    "install",
+    "--no-build-isolation",
+    "-v",
+    "-e",
+    ".",
+], cwd = ".", depends-on = ["build_mtckd"] }
+test = { cmd = "pytest tests/", cwd = "." }
+pre-commit = { cmd = "pre-commit run -a", cwd = "." }
+docs = { cmd = "sphinx-build -b html docs/sphinx/source docs/sphinx/build", cwd = "." }
+readthedocs = { cmd = "rm -rf $READTHEDOCS_OUTPUT/html && cp -r docs/sphinx/build/ $READTHEDOCS_OUTPUT/html", depends-on = ["docs"] }
+
+[tool.pixi.pypi-dependencies]
+hitran-api = "*"
+
+[tool.pixi.pypi-options]
+
+[tool.pixi.environments]
+default = ["test", "dev"]
+
+[tool.pixi.dependencies]
+maturin = "*"
+pip = "*"
+numpy = "*"
+sasktran2 = "*"
+gfortran = "*"
+netcdf-fortran = "*"
+ipython = "*"
+make = "*"
+binutils = "*"
+rust = "*"
+pytest = "*"
+pre-commit = "*"
+sphinx = "*"
+myst-nb = "*"
+matplotlib = "*"
+zenodo_get = "*"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+xfail_strict = true
+filterwarnings = [
+    "ignore:(ast.Str|Attribute s|ast.NameConstant|ast.Num) is deprecated:DeprecationWarning:_pytest",  # Python 3.12
+]
+testpaths = ["tests"]
