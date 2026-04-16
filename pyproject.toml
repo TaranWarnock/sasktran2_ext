@@ -126,6 +126,7 @@ pre-commit = "*"
 sphinx = "*"
 myst-nb = "*"
 matplotlib = "*"
+zenodo_get = "*"
 
 [tool.pytest.ini_options]
 minversion = "6.0"

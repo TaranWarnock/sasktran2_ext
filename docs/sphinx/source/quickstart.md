@@ -14,6 +14,7 @@ input parameters. Therefore, to add the continuum to our atmosphere, we must als
 We use the base SASKTRAN2 package to set up our model for a nadir-viewing infrared calculation,
 
 ```{code-cell}
+:tags: ["remove-cell"]
 import numpy as np
 import sasktran2 as sk
 
@@ -40,7 +41,49 @@ wavenum = np.arange(530, 550, 0.01)
 atmosphere = sk.Atmosphere(geometry, config, wavenumber_cminv=wavenum)
 sk.climatology.us76.add_us76_standard_atmosphere(atmosphere)
 for species in ["H2O", "O3", "CO2"]:
-    atmosphere[species] = sk.climatology.mipas.constituent(species, sk.optical.HITRANAbsorber(species))
+    hitran_db = sk.optical.database.OpticalDatabaseGenericAbsorber(sk.database.StandardDatabase().path(f"hitran/{species}/sasktran2/6e786d8451a300f48627c3239314a9c9214b44bb.nc"))
+    atmosphere[species] = sk.climatology.mipas.constituent(species, hitran_db)
+atmosphere["emission"] = sk.constituent.ThermalEmission()
+atmosphere["surface_emission"] = sk.constituent.SurfaceThermalEmission(300, 0.9)
+```
+
+```{code}
+import numpy as np
+import sasktran2 as sk
+
+config = sk.Config()
+config.emission_source = sk.EmissionSource.Standard
+config.single_scatter_source = sk.SingleScatterSource.NoSource
+
+altitude_grid = np.arange(0, 65001, 1000.0)
+
+geometry = sk.Geometry1D(
+    0.6,
+    0,
+    6327000,
+    altitude_grid,
+    sk.InterpolationMethod.LinearInterpolation,
+    sk.GeometryType.Spherical,
+)
+
+viewing_geo = sk.ViewingGeometry()
+viewing_geo.add_ray(sk.GroundViewingSolar(0.6, 0, 0.8, 200000))
+
+wavenum = np.arange(530, 550, 0.01)
+
+atmosphere = sk.Atmosphere(geometry, config, wavenumber_cminv=wavenum)
+sk.climatology.us76.add_us76_standard_atmosphere(atmosphere)
+for species in ["H2O", "O3", "CO2"]:
+    hitran_db = sk.database.HITRANDatabase(
+        molecule=species,
+        start_wavenumber=530,
+        end_wavenumber=550,
+        wavenumber_resolution=0.01,
+        reduction_factor=1,
+        backend="sasktran2",
+        profile="voigt"
+    )
+    atmosphere[species] = sk.climatology.mipas.constituent(species, hitran_db)
 atmosphere["emission"] = sk.constituent.ThermalEmission()
 atmosphere["surface_emission"] = sk.constituent.SurfaceThermalEmission(300, 0.9)
 ```
