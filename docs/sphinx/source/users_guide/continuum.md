@@ -19,16 +19,17 @@ by setting `h2o_name`, `co2_name`, and `o3_name` in the initialization of {py:cl
 Temperature and pressure profiles must also be set in the atmosphere.
 
 ```{note}
-The continuum calculated by MT_CKD accounts for contributions that are further than 25 cm{sup}`-1` from each line.
-When using the continuum it is recommended to leave the parameter `line_contribution_width` in the optical properties
-that do line-by-line calculations, such as {py:class}`sasktran2.optical.hitran.HITRANAbsorber` and {py:class}`sasktran2.optical.hitran.AERLineAbsorber`, at its default value of 25.
+The MT_CKD continuum accounts for contributions to the absorption further than 25 cm{sup}`-1` from the centre
+wavenumber of each line. When combining the continuum with line-by-line absorption from optical properties such as
+{py:class}`sasktran2.optical.hitran.HITRANAbsorber` it is recommended to leave the `line_contribution_width` parameter
+at its default value of 25.
 ```
 
 ## Weighting Functions
 
 Weighting functions are calculated with respect to pressure and temperature as well as H2O, CO2, and O3 VMR. In the output
-the weighting functions have `continuum` in their variable names to indicate they are portion of the species derivative
-resulting from the continuum. For example, if we perform a calculation with the continuum
+the weighting functions have `continuum` in their variable names to indicate they are the portion of the species derivative
+resulting from the continuum. For example, if we perform a calculation with the continuum,
 
 ```{code-cell}
 :tags: ["remove-cell"]
@@ -115,12 +116,17 @@ engine = sk.Engine(config, geometry, viewing_geo)
 output = engine.calculate_radiance(atmosphere)
 ```
 
-the output will be
+and look at the output,
 
+```{code-cell}
+:tags: ["remove-cell"]
+import xarray as xr
+xr.set_options(display_max_rows=20)
+```
 ```{code-cell}
 print(output)
 ```
 
-Notice there are two weighting functions related to ozone, `wf_O3_vmr` and `wf_continuum_O3_vmr`.
+there are two weighting functions related to ozone, `wf_O3_vmr` and `wf_continuum_O3_vmr`.
 The first contains the ozone weighting function contribution due to line-by-line absorption and
 the second is the contribution from continuum absorption.
