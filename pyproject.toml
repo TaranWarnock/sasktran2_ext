@@ -1,5 +1,5 @@
 [build-system]
-requires = ["maturin>=1.8,<2.0"]
+requires = ["maturin>=1.8,<2.0", "setuptools_scm>=8.0"]
 build-backend = "maturin"
 
 [project]
@@ -127,6 +127,7 @@ sphinx = "*"
 myst-nb = "*"
 matplotlib = "*"
 zenodo_get = "*"
+setuptools_scm = "*"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
