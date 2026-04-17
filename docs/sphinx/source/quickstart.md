@@ -5,11 +5,10 @@ file_format: mystnb
 (_quickstart)=
 # Quick Start
 
-SASKTRAN2 extensions are designed to be used with the base {py:mod}`sasktran2`.
-The MT_CKD continuum is implemented as a SASKTRAN2 constituent in {py:class}`sasktran2_ext.continuum.MTCKDContinuum`,
-
-The continuum constituent calls the MT_CKD fortran module, which requires pressure, temperature, H2O, CO2, and O3 as
-input parameters. Therefore, to add the continuum to our atmosphere, we must also include these species.
+SASKTRAN2 extensions are designed to be used with the base {py:mod}`sasktran2` package,
+with the MT_CKD continuum implemented as a constituent in {py:class}`sasktran2_ext.continuum.MTCKDContinuum`.
+The constituent calls the MT_CKD fortran module, which requires pressure, temperature, H2O, CO2, and O3 as
+input parameters. Therefore, our model atmosphere must contain these constituents.
 
 We use the base SASKTRAN2 package to set up our model for a nadir-viewing infrared calculation,
 
@@ -106,7 +105,7 @@ output_with_continuum = engine.calculate_radiance(atmosphere)
 
 Plot the result,
 ```{code-cell}
-:tags: ["remove-input","remove-stdout","remove-stderr"]
+:tags: ["remove-stdout","remove-stderr"]
 import matplotlib.pyplot as plt
 output_no_continuum["radiance"].isel(los=0, stokes=0).plot(label="No continuum")
 output_with_continuum["radiance"].isel(los=0, stokes=0).plot(label="With continuum")
